@@ -1,0 +1,15 @@
+server:
+  port: 8080
+  servlet:
+    session:
+      cookie:
+        http-only: true
+spring:
+  application:
+    name: SpringBatch
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    name: root
+    username: root
+    password: jinny837
+    url: jdbc:postgresql://0.0.0.0:54321/postgres
