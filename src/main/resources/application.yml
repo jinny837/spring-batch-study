@@ -4,6 +4,11 @@ server:
     session:
       cookie:
         http-only: true
+
+#logging:
+#  file:
+#    path: classpath:log4j2.xml
+
 spring:
   application:
     name: SpringBatch
@@ -12,4 +17,39 @@ spring:
     name: root
     username: root
     password: jinny837
-    url: jdbc:postgresql://0.0.0.0:54321/postgres
+    url: jdbc:postgresql://0.0.0.0:54321/mydatabase
+    hikari:
+      maximum-pool-size: 10
+      connection-timeout: 30000
+      idle-timeout: 600000
+  quartz:
+    auto-startup: true
+    scheduler-name: QuartzScheduler
+    job-store-type: jdbc
+    jdbc:
+      schema: classpath:quartz.sql
+      initialize-schema: never
+    properties:
+      org:
+        quartz:
+          threadPool:
+            threadNamePrefix: QuartzScheduler
+            threadCount: 10
+          scheduler:
+            instanceId: AUTO
+            instance-name: quartzScheduler
+          jobStore:
+            useProperties: true
+            class: org.springframework.scheduling.quartz.LocalDataSourceJobStore
+            driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
+            tablePrefix: QRTZ_
+
+management:
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        include: health, quartz, shutdown
+  endpoint:
+    shutdown:
+      enabled: true
