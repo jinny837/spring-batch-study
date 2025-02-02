@@ -49,7 +49,7 @@ public class JobsListener implements JobListener {
      */
     @Override
     public void jobWasExecuted(JobExecutionContext context, JobExecutionException jobException) {
-
+/*
         final int maxCnt = 3;
 
         int failCnt = context.getTrigger().getJobDataMap().getIntValue("failCnt");
@@ -58,8 +58,9 @@ public class JobsListener implements JobListener {
         String schedName = "";
         JobKey jobKey = context.getJobDetail().getKey();
         JobDataMap jobDataMap = context.getTrigger().getJobDataMap();
-
-        log.info("jobWasExecuted :: jobKey : {}", jobKey);
+*/
+        log.info("jobWasExecuted :: jobKey : {}", context.getJobDetail().getKey());
+        /*
         try {
             schedName = context.getScheduler().getSchedulerName();
             if(jobException != null){
@@ -107,7 +108,6 @@ public class JobsListener implements JobListener {
         } catch (SchedulerException e) {
             e.printStackTrace();
         }
-        /*
         QuartzBatchLogDto quartzBatchLogDto = QuartzBatchLogDto
                 .builder()
                 .schedName(schedName)

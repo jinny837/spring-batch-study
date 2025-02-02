@@ -6,19 +6,24 @@ import com.jinny.springbatch.job.QuartzJob;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.quartz.QuartzProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.quartz.CronTriggerFactoryBean;
+import org.springframework.scheduling.quartz.JobDetailFactoryBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import javax.naming.Name;
 import javax.sql.DataSource;
 import java.util.Properties;
 
 @Slf4j
 @Configuration
+//@EnableAutoConfiguration
+@ConditionalOnExpression("'${using.spring.schedulerFactory}'=='true'")
 @RequiredArgsConstructor
 public class QuartzConfig {
 
@@ -29,24 +34,27 @@ public class QuartzConfig {
     private final PlatformTransactionManager platformTransactionManager;
 
     @Bean
-    public JobDetail QuartzJobDetail() {
-        return JobBuilder.newJob(QuartzJob.class).withIdentity("name", "group")
-                .withDescription("Quartz Job")
-                .usingJobData("datakey", "value")
-
-                .storeDurably()
-                .build();
+    public JobDetailFactoryBean jobDetail() {
+        JobDetailFactoryBean jobDetailFactory = new JobDetailFactoryBean();
+        jobDetailFactory.setJobClass(QuartzJob.class);
+        jobDetailFactory.setDescription("Invoke Sample Job service...");
+        jobDetailFactory.setDurability(true);
+        return jobDetailFactory;
     }
 
     @Bean
-    public CronTrigger QuartzJobTrigger() {
-        CronScheduleBuilder cronScheduleBuilder = CronScheduleBuilder.cronSchedule("0/15 * * * * ?");
+    public CronTriggerFactoryBean crontrigger(JobDetail job) {
+        CronTriggerFactoryBean cronTriggerFactoryBean = new CronTriggerFactoryBean();
+        cronTriggerFactoryBean.setJobDetail(job);
+        cronTriggerFactoryBean.setCronExpression("0/30 * * * * ?");
+        cronTriggerFactoryBean.setName("QuartzJobTrigger");
+        cronTriggerFactoryBean.setGroup("globalTrigger");
 
-        return TriggerBuilder.newTrigger().forJob(QuartzJobDetail()).withIdentity("sampleTrigger").withSchedule(cronScheduleBuilder).build();
+        return cronTriggerFactoryBean;
     }
 
     @Bean
-    public SchedulerFactoryBean schedulerFactoryBean(ApplicationContext applicationContext) {
+    public SchedulerFactoryBean schedulerFactoryBean(Trigger trigger, JobDetail job, ApplicationContext applicationContext) {
         SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean();
 
         AutowiringSpringBeanJobFactory jobFactory = new AutowiringSpringBeanJobFactory();
@@ -56,9 +64,8 @@ public class QuartzConfig {
         schedulerFactoryBean.setApplicationContext(applicationContext);
 
         Properties properties = new Properties();
-        properties.setProperty("org.quartz.scheduler.instanceName", quartzProperties.getSchedulerName());
-
         properties.putAll(quartzProperties.getProperties());
+
         schedulerFactoryBean.setGlobalTriggerListeners(triggersListener);
         schedulerFactoryBean.setGlobalJobListeners(jobsListener);
         schedulerFactoryBean.setOverwriteExistingJobs(true);
@@ -66,7 +73,8 @@ public class QuartzConfig {
         schedulerFactoryBean.setQuartzProperties(properties);
         schedulerFactoryBean.setWaitForJobsToCompleteOnShutdown(true);
         schedulerFactoryBean.setTransactionManager(platformTransactionManager);
-        schedulerFactoryBean.setTriggers(applicationContext.getBean("QuartzJobTrigger", Trigger.class));
+        schedulerFactoryBean.setJobDetails(job);
+        schedulerFactoryBean.setTriggers(trigger);
         //Trigger quartzJobTrigger = applicationContext.getBean("QuartzJobTrigger", Trigger.class);
         //JobDetail quartzJobDetail = applicationContext.getBean("QuartzJobDetail", JobDetail.class);
         return schedulerFactoryBean;

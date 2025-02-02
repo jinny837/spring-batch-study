@@ -5,6 +5,9 @@ server:
       cookie:
         http-only: true
 
+using:
+  spring:
+    schedulerFactory: true
 #logging:
 #  file:
 #    path: classpath:log4j2.xml
@@ -35,6 +38,7 @@ spring:
           threadPool:
             threadNamePrefix: QuartzScheduler
             threadCount: 10
+            class: org.quartz.simpl.SimpleThreadPool
           scheduler:
             instanceId: AUTO
             instance-name: quartzScheduler
@@ -42,6 +46,7 @@ spring:
             useProperties: true
             class: org.springframework.scheduling.quartz.LocalDataSourceJobStore
             driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
+            dataSource: quartzDataSource
             tablePrefix: QRTZ_
 
 management:
