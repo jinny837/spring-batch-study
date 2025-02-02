@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: my_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: jinny837
+      POSTGRES_DB: mydatabase
+    ports:
+      - "54321:5432"  # 로컬 PC에서 접근 가능하게 포트 개방
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+volumes:
+  pgdata:

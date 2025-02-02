@@ -57,7 +57,7 @@ public class QuartzConfig {
     public SchedulerFactoryBean schedulerFactoryBean(Trigger trigger, JobDetail job, ApplicationContext applicationContext) {
         SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean();
 
-        AutowiringSpringBeanJobFactory jobFactory = new AutowiringSpringBeanJobFactory();
+         AutowiringSpringBeanJobFactory jobFactory = new AutowiringSpringBeanJobFactory();
         jobFactory.setApplicationContext(applicationContext);
         schedulerFactoryBean.setJobFactory(jobFactory);
 
@@ -73,7 +73,7 @@ public class QuartzConfig {
         schedulerFactoryBean.setQuartzProperties(properties);
         schedulerFactoryBean.setWaitForJobsToCompleteOnShutdown(true);
         schedulerFactoryBean.setTransactionManager(platformTransactionManager);
-        schedulerFactoryBean.setJobDetails(job);
+        //schedulerFactoryBean.setJobDetails(job);
         schedulerFactoryBean.setTriggers(trigger);
         //Trigger quartzJobTrigger = applicationContext.getBean("QuartzJobTrigger", Trigger.class);
         //JobDetail quartzJobDetail = applicationContext.getBean("QuartzJobDetail", JobDetail.class);
